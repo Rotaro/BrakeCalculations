@@ -71,11 +71,10 @@ class BrakeTest:
                 self.t_cutoff = press_lim
                 self.press_axis[press_lim:] = self.press_axis[press_lim]
                 self.force_axis[press_lim:] = self.force_axis[press_lim]
-        else:
-            if (force_lim != self.n_test):
-                self.t_cutoff = force_lim
-                self.press_axis[force_lim:] = self.press_axis[force_lim]
-                self.force_axis[force_lim:] = self.force_axis[force_lim]
+        elif (force_lim != self.n_test):
+            self.t_cutoff = force_lim
+            self.press_axis[force_lim:] = self.press_axis[force_lim]
+            self.force_axis[force_lim:] = self.force_axis[force_lim]
         #Generate noise
         self.press_axis[self.n_roll:] = \
             self.press_axis[self.n_roll:] + np.sqrt(self.press_axis[self.n_roll:])* \
@@ -102,7 +101,7 @@ class BrakePlotting:
 
     def create_plot(self):
         """
-        Creates an empty plot and stores it in object variables.
+        Creates an empty plot and stores it in instance variables.
         """
         fig1, ax1 = plt.subplots()
         ax2 = ax1.twinx()
@@ -115,7 +114,7 @@ class BrakePlotting:
 
     def reset_plot(self):
         """
-        Cleans axes of object's plot.
+        Cleans axes of instance plot.
         """
         try:
             if (len(self.axs) > 0):
@@ -130,8 +129,9 @@ class BrakePlotting:
 
     def advance_plot(self, event):
         """
-        Updates plot to next stage. Plugged into event handler 
-        for key presses in plot window.
+        Updates plot to next stage. 
+        
+        Plugged into event handler for key presses in plot window.
         """
         self.cease_anim = 1
         self.reset_plot()
