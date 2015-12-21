@@ -1,17 +1,22 @@
-import sys
+﻿import sys
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
+from matplotlib import lines as mlines
 import matplotlib.animation as animation
                 
 class BrakeTest:
     """
-    Generates brake test data. Brake pressure and brake force are generated as
-    linear functions of measurement time. Random noise is included.
+    Generates brake test data. 
+    
+    Brake pressure and brake force are generated as linear functions of 
+    measurement time. Random noise is added.
 
+    Arguments:
     n_test      - Number of data points to generate.
     """
 
+    #Max values for brake pressure and force, based on real tests.
     MAX_PRESS = 3.7
     MAX_FORCE = 45
     
@@ -135,17 +140,18 @@ class BrakePlotting:
             self.plot_raw_data()
         elif self.status == 2:
             self.status = 3
-            self.plot_clean_data()
+            self.plot_calc_6bar()
         elif self.status == 3:
             self.status = 4
-            self.plot_cleaned_data_z()
+            self.plot_calc_z()
         elif self.status == 4:
             self.status = 1
 
     def plot_raw_data(self):
         """
-        Plots the raw test data, including rolling resistance
-        and wake-up pressure.
+        Plots raw test data.
+       
+        Also plots lines for rolling resistance and wake-up pressure.
         """
         ax1 = self.axs[0]
         ax2 = self.axs[1]
@@ -195,7 +201,7 @@ class BrakePlotting:
                 ax1.set_title(
                     "Brake pressure and force measurement\nPress any key to continue.")
             return plt1,
-
+        #try-except is used to stop the animation if the user moves on
         try:
             animation.FuncAnimation(self.fig, update_lines, np.size(self.brkt.t_axis)-2, 
                                interval=100, repeat=False)
@@ -206,11 +212,12 @@ class BrakePlotting:
         ax1.legend([plt1, plt2], [l.get_label() for l in [plt1, plt2]], loc=2)
         plt.show()
 
-    def plot_clean_data(self):
+    def plot_calc_6bar(self):
         """
-        Cleans the data by removing rolling resistance from the brake force.
-        Fits a line using least squares to extrapolate brake force at
-        6 bar brake pressure.
+        Calculates and plots extrapolation of brake force to 6 bars.
+        
+        Removes rolling resistance from the brake force, and extrapolates 
+        the brake force at 6 bar brake pressure using linear regression.
         """
         #Sort data according to brake pressure
         rel_data = self.brkt.n_roll+self.brkt.force_delay
@@ -255,9 +262,11 @@ class BrakePlotting:
         
         plt.show()
         
-    def plot_cleaned_data_z(self):
+    def plot_calc_z(self):
         """
-        Calculates z from brake force and draws brake corridors (acceptable values).
+        Calculates and plots z, i.e. proportion of brake force to axle weight. 
+       
+        Also draws brake corridors (i.e. acceptable values for z).
         """
         #Sort data according to brake pressure
         rel_data = self.brkt.n_roll+self.brkt.force_delay
@@ -277,7 +286,8 @@ class BrakePlotting:
         #Animation 
         unl = Rectangle((0, 0), 1, 1, fc="red") #proxy for unloaded colored area
         l = Rectangle((0, 0), 1, 1, fc="green") #proxy for loaded colored area 
-        fit = Rectangle((0, 0), 1, 1, fc="green") #proxy for loaded colored area 
+        fit = Rectangle((0, 0), 1, 1, fc="magenta") #proxy for loaded colored area 
+        fit = mlines.Line2D([], [], color='magenta')
         second_time = 0 #prevents animation from calling same function twice..
         def update_lines(num):
             if (self.status != 4):
